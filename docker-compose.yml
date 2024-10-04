@@ -1,0 +1,41 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports: 
+      - "8080:80"
+    restart: always
+    networks:
+      - internal
+    depends_on:
+      - php
+  
+  php:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    restart: always
+    networks:
+      - internal
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+  db:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 4s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    restart: always
+    networks:
+      - internal
+  
+networks:
+  internal:
+    driver: bridge
