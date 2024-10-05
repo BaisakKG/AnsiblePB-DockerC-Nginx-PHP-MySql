@@ -18,6 +18,7 @@
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/docer-ce.repo
+        mode: "0644"
 
     - name: Install git and docker-ce
       ansible.builtin.dnf:
