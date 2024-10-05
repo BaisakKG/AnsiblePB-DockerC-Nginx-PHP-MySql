@@ -39,20 +39,23 @@
         dest: /opt/webapp
         single_branch: yes
         version: main
-    
- #   - name: Install requests python package
- #     ansible.builtin.pip:
- #       name: 
- #         - requests
- #         - python-packaging
 
     - name: Run `docker-compose up`
       community.docker.docker_compose_v2:
         project_src: /opt/webapp/
-        
       register: output
-    
-    - name: Show results
-      ansible.builtin.debug:
-        var: output
 
+    - name: Verify that webapp services are running
+      ansible.builtin.assert:
+        that:
+            - php_container.State == 'running'
+            - db_container.State == 'running'
+            - nginx_container.State == 'running'
+        
+      vars:
+        php_container: >-
+          {{ output.containers | selectattr("Service", "equalto", "php") | first }}
+        db_container: >-
+          {{ output.containers | selectattr("Service", "equalto", "db") | first }}
+        nginx_container: >-
+          {{ output.containers | selectattr("Service", "equalto", "nginx") | first }}
