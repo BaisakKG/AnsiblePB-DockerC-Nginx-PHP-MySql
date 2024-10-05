@@ -1,0 +1,58 @@
+---
+- name: Deploy Docker Application
+  hosts: almalinux
+  become: yes
+
+  vars:
+    git_repo: https://github.com/BaisakKG/AnsiblePB-DockerC-Nginx-PHP-MySql.git
+    docker_compose_file: docker-compose.yml
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Update system packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+      
+    - name: Install git and docker-ce
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - docker-ce
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Clone git repository
+      ansible.builtin.git:
+        repo: "{{ git_repo }}"
+        dest: /opt/webapp
+        single_branch: yes
+        version: main
+    
+ #   - name: Install requests python package
+ #     ansible.builtin.pip:
+ #       name: 
+ #         - requests
+ #         - python-packaging
+
+    - name: Run `docker-compose up`
+      community.docker.docker_compose_v2:
+        project_src: /opt/webapp/
+        
+      register: output
+    
+    - name: Show results
+      ansible.builtin.debug:
+        var: output
+
