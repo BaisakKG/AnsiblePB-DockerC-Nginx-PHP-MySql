@@ -1,7 +1,7 @@
 ---
 - name: Deploy Docker Application
   hosts: almalinux
-  become: yes
+  become: true
 
   vars:
     git_repo: https://github.com/BaisakKG/AnsiblePB-DockerC-Nginx-PHP-MySql.git
@@ -13,12 +13,12 @@
       ansible.builtin.dnf:
         name: "*"
         state: latest
-        
+
     - name: Add Docker repo
-      get_url:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/docer-ce.repo
-      
+
     - name: Install git and docker-ce
       ansible.builtin.dnf:
         name: "{{ item }}"
@@ -31,13 +31,13 @@
       ansible.builtin.service:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Clone git repository
       ansible.builtin.git:
         repo: "{{ git_repo }}"
         dest: /opt/webapp
-        single_branch: yes
+        single_branch: true
         version: main
 
     - name: Run `docker-compose up`
@@ -48,10 +48,10 @@
     - name: Verify that webapp services are running
       ansible.builtin.assert:
         that:
-            - php_container.State == 'running'
-            - db_container.State == 'running'
-            - nginx_container.State == 'running'
-        
+          - php_container.State == 'running'
+          - db_container.State == 'running'
+          - nginx_container.State == 'running'
+
       vars:
         php_container: >-
           {{ output.containers | selectattr("Service", "equalto", "php") | first }}
