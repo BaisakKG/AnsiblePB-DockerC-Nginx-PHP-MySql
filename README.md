@@ -6,6 +6,7 @@
 - Нужен ansible для запуска playbook
 - Скачать файлы deploy-webapp-docker.yml и inventory
 - Настроить файл inventory (IP, ssh key...)
+- запустить ``` ansible-playbook deploy-webapp-docker.yml -i inventory ```
 ##### На стороне сервера:
 - Almalinux 9
     
